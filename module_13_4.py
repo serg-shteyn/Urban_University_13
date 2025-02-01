@@ -15,6 +15,16 @@ bot = Bot(token=api)
 dp = Dispatcher(bot,storage=MemoryStorage())
 
 
+async def mifflin(data):
+	res = (int(data['age'])*5)
+	res+=(int(data['growth'])*6.25)
+	res+=(int(data['weight'])*10)
+	res1=round(res+5,1)
+	res2=round(res-161,1)
+
+	return res1,res2
+
+
 # Внутри этого класса опишите 3 объекта класса State: age, growth, weight (возраст, рост, вес).
 class UserState(StatesGroup):
 
@@ -43,7 +53,8 @@ async def set_weight(message, state):
 async def send_calories(message, state):
     await state.update_data(weight = message.text)
     data = await state.get_data()
-    await message.answer(f"Результат: {data}")
+    result = await mifflin(data)
+    await message.answer(f"Норма калорий в день для вас (мужчина/женщина): ({result[0]} / {result[1]})")
     await state.finish()
 
 @dp.message_handler()
