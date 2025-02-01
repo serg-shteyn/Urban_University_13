@@ -79,8 +79,9 @@ async def send_calories(message, state):
     if not result:
         await message.answer('Неправильный ввод данных')
         await state.finish()
-    await message.answer(f"Норма калорий в день для вас (мужчина/женщина): ({result[0]} / {result[1]})")
-    await state.finish()
+    else:
+        await message.answer(f"Норма калорий в день для вас (мужчина/женщина): ({result[0]} / {result[1]})")
+        await state.finish()
 
 
 @dp.message_handler(commands=['start'])
