@@ -23,15 +23,16 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 kb_inline = InlineKeyboardMarkup(resize_keyboard=True)
 button1 = InlineKeyboardButton(text='Product1',callback_data='product_buying')
 button2 = InlineKeyboardButton(text='Product2', callback_data='product_buying')
-button3 = InlineKeyboardButton(text='Product1',callback_data='product_buying')
-button4 = InlineKeyboardButton(text='Product2', callback_data='product_buying')
+button3 = InlineKeyboardButton(text='Product3',callback_data='product_buying')
+button4 = InlineKeyboardButton(text='Product4', callback_data='product_buying')
 kb_inline.add(button1, button2, button3, button4)
 
 kb = ReplyKeyboardMarkup(resize_keyboard=True)
 button11 = KeyboardButton(text='Информация')
 button22 = KeyboardButton(text='Рассчитать')
 button33 = KeyboardButton(text='Купить')
-kb.row(button11,button22,button33)
+kb.row(button11,button22)
+kb.row(button33)
 
 bot = Bot(token=api)
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -58,10 +59,22 @@ class UserState(StatesGroup):
 @dp.message_handler(text = 'Рассчитать')
 async def main_menu(message):
     await message.answer('Выберите опцию:', reply_markup=kb_inline)
+
 # 'Название: Product<number> | Описание: описание <number> | Цена: <number * 100>'
 @dp.message_handler(text = 'Купить')
 async def get_buying_list(message):
-    await message.answer('Название: Product1 | Описание: описание1 | Цена: <number * 100>', reply_markup=kb_inline)
+    await message.answer('Название: Product1 | Описание: описание1 | Цена: <number * 100>')
+    await message.answer('Название: Product2 | Описание: описание2 | Цена: <number * 100>')
+    await message.answer('Название: Product3 | Описание: описание3 | Цена: <number * 100>')
+    await message.answer('Название: Product4 | Описание: описание4 | Цена: <number * 100>')
+    await message.answer('Выберите продукт для покупки: ', reply_markup=kb_inline)
+
+
+# Callback хэндлер, который реагирует на текст "product_buying" и оборачивает функцию send_confirm_message(call).
+@dp.callback_query_handler(text = 'product_buying')
+async def send_confirm_message(call):
+    await  call.message.answer('Вы успешно приобрели продукт!')
+    await  call.answer()
 
 @dp.callback_query_handler(text = 'formulas')
 async def get_formulas(call):
