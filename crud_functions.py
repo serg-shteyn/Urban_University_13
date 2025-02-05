@@ -9,17 +9,24 @@ price(цена) - целое число (не пустой)
 
 
 def initiate_db():
-	connection = sqlite3
-	connect('database.db')
+	connection = sqlite3.connect('database.db')
 	cursor = connection.cursor()
 	cursor.execute('''
 	CREATE TABLE IF NOT EXISTS Products(
-	id PRIMARY KEY,
+	id PRIMARY KEY AUTOINCREMENT,
 	title TEXT NOT NULL,
 	description TEXT,
 	price INTEGER NOT NULL 
 	);
 	''')
+	connection.commit()
+	connection.close()
+	
+def add_in_db():
+	connection = sqlite3.connect('database.db')
+	cursor = connection.cursor()
+	cursor.execute("INSERT INTO Products (title,description,price) VALUES (?,?,?)", ('Balance','Amazfit Balance','17000'))
+	cursor.execute("INSERT INTO Products (title,description,price) VALUES (?,?,?)",('T-Rex 3','Amazfit T-Rex 3','23000'))
 	connection.commit()
 	connection.close()
 
@@ -30,8 +37,7 @@ get_all_products, которая возвращает все записи из �
 
 
 def get_all_products():
-	connection = sqlite3
-	connect('database.db')
+	connection = sqlite3.connect('database.db')
 	cursor = connection.cursor()
 	products=cursor.execute("SELECT * FROM Products").fetchall()
 	connection.commit()

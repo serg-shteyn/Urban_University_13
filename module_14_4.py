@@ -14,7 +14,11 @@ from tb_api import api
 import asyncio
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
-from crud_functions
+from crud_functions import *
+
+initiate_db()
+add_in_db()
+print(get_all_products())
 
 
 kb_inline = InlineKeyboardMarkup(resize_keyboard=True)
