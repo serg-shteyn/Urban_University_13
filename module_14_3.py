@@ -21,11 +21,12 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 
 kb_inline = InlineKeyboardMarkup(resize_keyboard=True)
-button1 = InlineKeyboardButton(text='Product1',callback_data='product_buying')
-button2 = InlineKeyboardButton(text='Product2', callback_data='product_buying')
-button3 = InlineKeyboardButton(text='Product3',callback_data='product_buying')
-button4 = InlineKeyboardButton(text='Product4', callback_data='product_buying')
-kb_inline.add(button1, button2, button3, button4)
+button1 = InlineKeyboardButton(text='Balance',callback_data='product_buying')
+button2 = InlineKeyboardButton(text='T-Rex 3', callback_data='product_buying')
+button3 = InlineKeyboardButton(text='Forerunner 55',callback_data='product_buying')
+button4 = InlineKeyboardButton(text='Watch GS 3', callback_data='product_buying')
+kb_inline.add(button1, button2)
+kb_inline.add(button3, button4)
 
 kb = ReplyKeyboardMarkup(resize_keyboard=True)
 button11 = KeyboardButton(text='Информация')
@@ -56,17 +57,17 @@ class UserState(StatesGroup):
     weight = State()
 
 
-@dp.message_handler(text = 'Рассчитать')
-async def main_menu(message):
-    await message.answer('Выберите опцию:', reply_markup=kb_inline)
-
 # 'Название: Product<number> | Описание: описание <number> | Цена: <number * 100>'
 @dp.message_handler(text = 'Купить')
 async def get_buying_list(message):
-    await message.answer('Название: Product1 | Описание: описание1 | Цена: <number * 100>')
-    await message.answer('Название: Product2 | Описание: описание2 | Цена: <number * 100>')
-    await message.answer('Название: Product3 | Описание: описание3 | Цена: <number * 100>')
-    await message.answer('Название: Product4 | Описание: описание4 | Цена: <number * 100>')
+    with open('files/Amazfit_Balance.jpg.webp','rb') as img:
+    	await message.answer_photo(img,'Название: Balance | Описание: Amazfit Balance | Цена: 17000')
+    with open('files/Amazfit_T-Rex_3_.webp','rb') as img:
+    	await message.answer_photo(img,'Название: T-Rex 3 | Описание: Amazfit T-Rex 3 | Цена: 23000')
+    with open('files/Garmin Forerunner 55_.png','rb') as img:
+    	await message.answer_photo(img,'Название: Forerunner 55 | Описание: Garmin Forerunner 55 Цена: 22800')
+    with open('files/HONOR_Watch_GS_3_.webp','rb') as img:
+    	await message.answer_photo(img,'Название: Watch GS 3| Описание: HONOR Watch GS 3 | Цена: 12000')
     await message.answer('Выберите продукт для покупки: ', reply_markup=kb_inline)
 
 
@@ -83,10 +84,9 @@ async def get_formulas(call):
                                'для женщин: 10 x вес (кг) + 6,25 x рост (см) – 5 x возраст (г) – 161.')
 
 
-@dp.callback_query_handler(text='calories')
-async def set_age(call):
-    await call.message.answer('Введите свой возраст:')
-    await call.answer()
+@dp.message_handler(text='Рассчитать')
+async def set_age(message):
+    await message.answer('Введите свой возраст:')
     await UserState.age.set()
 
 
