@@ -17,8 +17,8 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 from crud_functions import *
 
 initiate_db()
-add_in_db()
-print(get_all_products())
+#add_in_db()
+
 
 
 kb_inline = InlineKeyboardMarkup(resize_keyboard=True)
@@ -61,14 +61,9 @@ class UserState(StatesGroup):
 # 'Название: Product<number> | Описание: описание <number> | Цена: <number * 100>'
 @dp.message_handler(text = 'Купить')
 async def get_buying_list(message):
-    with open('files/Amazfit_Balance.jpg.webp','rb') as img:
-    	await message.answer_photo(img,'Название: Balance | Описание: Amazfit Balance | Цена: 17000')
-    with open('files/Amazfit_T-Rex_3_.webp','rb') as img:
-    	await message.answer_photo(img,'Название: T-Rex 3 | Описание: Amazfit T-Rex 3 | Цена: 23000')
-    with open('files/Garmin Forerunner 55_.png','rb') as img:
-    	await message.answer_photo(img,'Название: Forerunner 55 | Описание: Garmin Forerunner 55 Цена: 22800')
-    with open('files/HONOR_Watch_GS_3_.webp','rb') as img:
-    	await message.answer_photo(img,'Название: Watch GS 3| Описание: HONOR Watch GS 3 | Цена: 12000')
+    for product in get_all_products():
+        with open(f'files/{product[1]}.webp','rb') as img:
+            await message.answer_photo(img,f'Название: {product[1]} | Описание: {product[2]} | Цена: {product[3]}')
     await message.answer('Выберите продукт для покупки: ', reply_markup=kb_inline)
 
 

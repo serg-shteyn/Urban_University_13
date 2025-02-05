@@ -13,7 +13,7 @@ def initiate_db():
 	cursor = connection.cursor()
 	cursor.execute('''
 	CREATE TABLE IF NOT EXISTS Products(
-	id PRIMARY KEY AUTOINCREMENT,
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	title TEXT NOT NULL,
 	description TEXT,
 	price INTEGER NOT NULL 
@@ -25,8 +25,8 @@ def initiate_db():
 def add_in_db():
 	connection = sqlite3.connect('database.db')
 	cursor = connection.cursor()
-	cursor.execute("INSERT INTO Products (title,description,price) VALUES (?,?,?)", ('Balance','Amazfit Balance','17000'))
-	cursor.execute("INSERT INTO Products (title,description,price) VALUES (?,?,?)",('T-Rex 3','Amazfit T-Rex 3','23000'))
+	cursor.execute("INSERT INTO Products (title,description,price) VALUES (?,?,?)", ('Forerunner 55','Garmin Forerunner 55','22800'))
+	cursor.execute("INSERT INTO Products (title,description,price) VALUES (?,?,?)",('Watch GS 3','HONOR Watch GS 3','12000'))
 	connection.commit()
 	connection.close()
 
