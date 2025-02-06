@@ -1,34 +1,44 @@
 import sqlite3
 '''	
-initiate_db, которая создаёт таблицу Products, если она ещё не создана при помощи SQL запроса. Эта таблица должна содержать следующие поля:
-id - целое число, первичный ключ
-title(название продукта) - текст (не пустой)
-description(описание) - текст
-price(цена) - целое число (не пустой)
+
+'''
+connection = sqlite3.connect('database.db')
+cursor = connection.cursor()
+'''
+is_included(username) принимает имя пользователя и возвращает True, если такой пользователь есть в таблице Users, в противном случае False. Для получения записей используйте SQL запрос.
 '''
 
-
 def initiate_db():
-	connection = sqlite3.connect('database.db')
-	cursor = connection.cursor()
 	cursor.execute('''
 	CREATE TABLE IF NOT EXISTS Products(
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	id PRIMARY KEY AUTOINCREMENT,
 	title TEXT NOT NULL,
 	description TEXT,
 	price INTEGER NOT NULL 
 	);
 	''')
+	cursor.execute('''
+	CREATE TABLE IF NOT EXISTS Users(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	username TEXT NOT NULL,
+	email TEXT NOT NULL,
+	age INTEGER NOT NULL,
+	balance INTEGER NOT NULL 
+	);
+	''')
 	connection.commit()
-	connection.close()
+	
+def is_included(username):
+	cursor.execute(f"SELECT username FROM Users WHERE username == {username}").fetchall()
+	
+def add_user(username, email, age):
+	cursor.execute("INSERT INTO Users (username,email,age,balance) VALUES (?,?,?,?)",(username,email,age,1000))
+	connection.commit()
 	
 def add_in_db():
-	connection = sqlite3.connect('database.db')
-	cursor = connection.cursor()
-	cursor.execute("INSERT INTO Products (title,description,price) VALUES (?,?,?)", ('Forerunner 55','Garmin Forerunner 55','22800'))
-	cursor.execute("INSERT INTO Products (title,description,price) VALUES (?,?,?)",('Watch GS 3','HONOR Watch GS 3','12000'))
+	cursor.execute("INSERT INTO Products (title,description,price) VALUES (?,?,?)", ('Balance','Amazfit Balance','17000'))
+	cursor.execute("INSERT INTO Products (title,description,price) VALUES (?,?,?)",('T-Rex 3','Amazfit T-Rex 3','23000'))
 	connection.commit()
-	connection.close()
 
 '''
 get_all_products, которая возвращает все записи из таблицы Products, полученные при помощи SQL запроса.
@@ -37,9 +47,9 @@ get_all_products, которая возвращает все записи из �
 
 
 def get_all_products():
-	connection = sqlite3.connect('database.db')
-	cursor = connection.cursor()
 	products=cursor.execute("SELECT * FROM Products").fetchall()
 	connection.commit()
-	connection.close()
 	return products
+
+connection.commit()
+#connection.close()
