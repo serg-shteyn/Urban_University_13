@@ -5,13 +5,7 @@
 
 Изменения в Telegram-бот:
 Кнопки главного меню дополните кнопкой "Регистрация".
-Напишите новый класс состояний RegistrationState с следующими объектами класса State: username, email, age, balance(по умолчанию 1000).
-Создайте цепочку изменений состояний RegistrationState.
-Фукнции цепочки состояний RegistrationState:
-sing_up(message):
-Оберните её в message_handler, который реагирует на текстовое сообщение 'Регистрация'.
-Эта функция должна выводить в Telegram-бот сообщение "Введите имя пользователя (только латинский алфавит):".
-После ожидать ввода имени в атрибут RegistrationState.username при помощи метода set.
+Напишите новый класс состояний RegistrationState с следующими объектами класса State:
 set_username(message, state):
 Оберните её в message_handler, который реагирует на состояние RegistrationState.username.
 Если пользователя message.text ещё нет в таблице, то должны обновляться данные в состоянии username на message.text. Далее выводится сообщение "Введите свой email:" и принимается новое состояние RegistrationState.email.
@@ -39,7 +33,13 @@ from crud_functions import *
 
 initiate_db()
 #add_in_db()
+add_user('Dmitriy','dimamen@mail.ru','41')
+add_user('Sergey','shtem_x@mail.ru','44')
+add_user('Vasiliy','Vasyliy77@mail.ru','47')
+add_user('Maksim','maks18@mail.ru','6')
+
 products=get_all_products()
+
 
 
 kb_inline = InlineKeyboardMarkup(resize_keyboard=True)
@@ -54,8 +54,10 @@ kb = ReplyKeyboardMarkup(resize_keyboard=True)
 button11 = KeyboardButton(text='Информация')
 button22 = KeyboardButton(text='Рассчитать')
 button33 = KeyboardButton(text='Купить')
+button44 = KeyboardButton(text='Регистрация')
 kb.row(button11,button22)
 kb.row(button33)
+kb.row(button44)
 
 bot = Bot(token=api)
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -78,6 +80,66 @@ class UserState(StatesGroup):
     growth = State()
     weight = State()
 
+class RegistrationState(StatesGroup):
+    username = State()
+    email = State()
+    age = State()
+    balance = State()
+
+@dp.message_handler(text='Регистрация')
+async def sing_up(message):
+    await message.answer('Введите имя пользователя (только латинский алфавит):')
+    await RegistrationState.username.set()
+
+@dp.message_handler(state=RegistrationState.username)
+async def set_username(message,state):
+   await state.update_data(username=message.text)
+   await message.answer('Введите свой email:')
+   await RegistrationState.email.set()
+
+@dp.message_handler(state=RegistrationState.email)
+async def set_email(message,state):
+   await state.update_data(email=message.text)
+   await message.answer('Введите свой возраст:')
+   await RegistrationState.age.set()
+
+@dp.message_handler(state=RegistrationState.age)
+async def set_age(message,state):
+    await state.update_data(age=message.text)
+    data = await state.get_data()
+    if is_included(data['username']):
+        await message.answer('Регистрация не прошла!\nПользователь с таким именем уже есть!')
+        await state.finish()
+    else:
+        try:
+            add_user(data['username'],data['email'],data['age'])
+            await message.answer('Поздравляем! Регистрация прошла успешно!')
+        except:
+            await message.answer('Произошла ошибка! (Не правильно введены данные)')
+            await state.finish()
+
+
+'''
+set_username(message, state):
+
+    Оберните её в message_handler, который реагирует на состояние RegistrationState.username.
+    Если пользователя message.text ещё нет в таблице, то должны обновляться данные в состоянии username на message.text. Далее выводится сообщение "Введите свой email:" и принимается новое состояние RegistrationState.email.
+    Если пользователь с таким message.text есть в таблице, то выводить "Пользователь существует, введите другое имя" и запрашивать новое состояние для RegistrationState.username.
+
+set_email(message, state):
+
+    Оберните её в message_handler, который реагирует на состояние RegistrationState.email.
+    Эта функция должна обновляться данные в состоянии RegistrationState.email на message.text.
+    Далее выводить сообщение "Введите свой возраст:":
+    После ожидать ввода возраста в атрибут RegistrationState.age.
+
+set_age(message, state):
+
+    Оберните её в message_handler, который реагирует на состояние RegistrationState.age.
+    Эта функция должна обновляться данные в состоянии RegistrationState.age на message.text.
+    Далее брать все данные (username, email и age) из состояния и записывать в таблицу Users при помощи ранее написанной crud-функции add_user.
+    В конце завершать приём состояний при помощи метода finish().
+'''
 
 # 'Название: Product<number> | Описание: описание <number> | Цена: <number * 100>'
 @dp.message_handler(text = 'Купить')
@@ -92,7 +154,6 @@ async def get_buying_list(message):
 @dp.callback_query_handler(text = 'product_buying')
 async def send_confirm_message(call):
     await  call.message.answer('Вы успешно приобрели продукт!')
-    await call.message.answer(call.message.reply_markup.inline_keyboard[0])
     await  call.answer()
 
 @dp.callback_query_handler(text = 'formulas')
