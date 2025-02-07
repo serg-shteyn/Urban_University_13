@@ -86,62 +86,40 @@ class RegistrationState(StatesGroup):
     age = State()
     balance = State()
 
+# message_handler, который реагирует на текст сообщения "Регистрация"
 @dp.message_handler(text='Регистрация')
 async def sing_up(message):
     await message.answer('Введите имя пользователя (только латинский алфавит):')
     await RegistrationState.username.set()
 
+# message_handler, который реагирует на состояние RegistrationState.username
 @dp.message_handler(state=RegistrationState.username)
 async def set_username(message,state):
-   await state.update_data(username=message.text)
-   await message.answer('Введите свой email:')
-   await RegistrationState.email.set()
+    if not is_included(message.text):
+        await state.update_data(username=message.text)
+        await message.answer('Введите свой email:')
+        await RegistrationState.email.set()
+    else:
+        await message.answer('Пользователь существует, введите другое имя')
+        await RegistrationState.username.set()
 
+# message_handler, который реагирует на состояние RegistrationState.email
 @dp.message_handler(state=RegistrationState.email)
 async def set_email(message,state):
    await state.update_data(email=message.text)
    await message.answer('Введите свой возраст:')
    await RegistrationState.age.set()
 
+# message_handler, который реагирует на состояние RegistrationState.age
 @dp.message_handler(state=RegistrationState.age)
 async def set_age(message,state):
     await state.update_data(age=message.text)
     data = await state.get_data()
-    if is_included(data['username']):
-        await message.answer('Регистрация не прошла!\nПользователь с таким именем уже есть!')
-        await state.finish()
-    else:
-        try:
-            add_user(data['username'],data['email'],data['age'])
-            await message.answer('Поздравляем! Регистрация прошла успешно!')
-        except:
-            await message.answer('Произошла ошибка! (Не правильно введены данные)')
-            await state.finish()
+    add_user(data['username'],data['email'],data['age'])
+    await message.answer(f"Пользователь {data['username']} успешно зарегистрирован!")
+    await state.finish()
 
-
-'''
-set_username(message, state):
-
-    Оберните её в message_handler, который реагирует на состояние RegistrationState.username.
-    Если пользователя message.text ещё нет в таблице, то должны обновляться данные в состоянии username на message.text. Далее выводится сообщение "Введите свой email:" и принимается новое состояние RegistrationState.email.
-    Если пользователь с таким message.text есть в таблице, то выводить "Пользователь существует, введите другое имя" и запрашивать новое состояние для RegistrationState.username.
-
-set_email(message, state):
-
-    Оберните её в message_handler, который реагирует на состояние RegistrationState.email.
-    Эта функция должна обновляться данные в состоянии RegistrationState.email на message.text.
-    Далее выводить сообщение "Введите свой возраст:":
-    После ожидать ввода возраста в атрибут RegistrationState.age.
-
-set_age(message, state):
-
-    Оберните её в message_handler, который реагирует на состояние RegistrationState.age.
-    Эта функция должна обновляться данные в состоянии RegistrationState.age на message.text.
-    Далее брать все данные (username, email и age) из состояния и записывать в таблицу Users при помощи ранее написанной crud-функции add_user.
-    В конце завершать приём состояний при помощи метода finish().
-'''
-
-# 'Название: Product<number> | Описание: описание <number> | Цена: <number * 100>'
+# message_handler, который реагирует на текст сообщения "Купить"
 @dp.message_handler(text = 'Купить')
 async def get_buying_list(message):
     for product in products:
@@ -150,12 +128,13 @@ async def get_buying_list(message):
     await message.answer('Выберите продукт для покупки: ', reply_markup=kb_inline)
 
 
-# Callback хэндлер, который реагирует на текст "product_buying" и оборачивает функцию send_confirm_message(call).
+# сallback хэндлер, который реагирует на callback_data "product_buying"
 @dp.callback_query_handler(text = 'product_buying')
 async def send_confirm_message(call):
     await  call.message.answer('Вы успешно приобрели продукт!')
     await  call.answer()
 
+# сallback хэндлер, который реагирует на callback_data "formula"
 @dp.callback_query_handler(text = 'formulas')
 async def get_formulas(call):
     await  call.message.answer('Упрощенный вариант формулы Миффлина-Сан Жеора:'
@@ -214,5 +193,3 @@ async def all_messsage(message):
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
-    connection.commit()
-    connection.close()
